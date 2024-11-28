@@ -1,0 +1,95 @@
+#######################################
+# Datatypes
+#######################################
+BQ76952              KEYWORD1
+bq76952_thermistor   KEYWORD2
+bq76952_fet          KEYWORD2
+bq76952_fet_state    KEYWORD2
+bq76952_scd_thresh   KEYWORD2
+bq_protection_t      KEYWORD2
+bq_temp_t            KEYWORD2
+
+#######################################
+# Functions
+#######################################
+begin                  KEYWORD2
+setDebug               KEYWORD2
+reset                  KEYWORD2
+directCommandRead      KEYWORD2
+CommandOnlysubCommand  KEYWORD2
+subCommandwithdata     KEYWORD2
+readDataMemory         KEYWORD2
+writeDataMemory        KEYWORD2
+writeByteToMemory      KEYWORD2
+writeIntToMemory       KEYWORD2
+getCellVoltage         KEYWORD2
+getCurrent             KEYWORD2
+setConnectedCells      KEYWORD2
+setFET                 KEYWORD2
+isCharging             KEYWORD2
+isDischarging          KEYWORD2
+getInternalTemp        KEYWORD2
+getThermistorTemp      KEYWORD2
+getProtectionStatus    KEYWORD2
+getTemperatureStatus   KEYWORD2
+debugPrint             KEYWORD2
+debugPrintln           KEYWORD2
+debugPrintlnCmd        KEYWORD2
+
+#######################################
+# Constants
+#######################################
+CMD_DIR_SUBCMD_LOW       LITERAL1
+CMD_DIR_SUBCMD_HI        LITERAL1
+CMD_DIR_RESP_LEN         LITERAL1
+CMD_DIR_RESP_START       LITERAL1
+CMD_DIR_RESP_CHKSUM      LITERAL1
+DIR_CMD_SPROTEC          LITERAL1
+DIR_CMD_FPROTEC          LITERAL1
+DIR_CMD_STEMP            LITERAL1
+DIR_CMD_FTEMP            LITERAL1
+DIR_CMD_SFET             LITERAL1
+DIR_CMD_FFET             LITERAL1
+DIR_CMD_BAT_STATUS       LITERAL1
+DIR_CMD_VCELL_1          LITERAL1
+DIR_CMD_VCELL_16         LITERAL1
+DIR_CMD_VSTACK           LITERAL1
+DIR_CMD_VPACK            LITERAL1
+DIR_CMD_CC2_CUR          LITERAL1
+DIR_CMD_INT_TEMP         LITERAL1
+DIR_CMD_FET_STAT         LITERAL1
+COSCMD_RESET             LITERAL1
+COSCMD_SET_CFGUPDATE     LITERAL1
+COSCMD_EXIT_CFGUPDATE    LITERAL1
+COSCMD_ALL_FETS_ON       LITERAL1
+COSCMD_MANUFAC_TOGGLE_FE LITERAL1
+DASTATUS_5               LITERAL1
+DASTATUS_6               LITERAL1
+Enabled_Protections_A    LITERAL1
+CUV_Threshold            LITERAL1
+COV_Threshold            LITERAL1
+OCC_Threshold            LITERAL1
+OCD1_Threshold           LITERAL1
+OCD1_Delay               LITERAL1
+OCD2_Threshold           LITERAL1
+OCD2_Delay               LITERAL1
+SCD_Threshold            LITERAL1
+SCD_Delay                LITERAL1
+FET_Predischarge_Timeout LITERAL1
+FET_Predischarge_Stop_Delta LITERAL1
+FET_Options              LITERAL1
+Mfg_Status_Init          LITERAL1
+DA_Configuration         LITERAL1
+BIT_SA_SC_DCHG           LITERAL1
+BIT_SA_OC2_DCHG          LITERAL1
+BIT_SA_OC1_DCHG          LITERAL1
+BIT_SA_OC_CHG            LITERAL1
+BIT_SA_CELL_OV           LITERAL1
+BIT_SA_CELL_UV           LITERAL1
+BIT_SB_OTF               LITERAL1
+BIT_SB_OTINT             LITERAL1
+BIT_SB_OTD               LITERAL1
+BIT_SB_OTC               LITERAL1
+BIT_SB_UTINT             LITERAL1
+BIT_SB_UTD               LITERAL1
+BIT_SB_UTC               LITERAL1
