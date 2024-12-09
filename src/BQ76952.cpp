@@ -288,6 +288,11 @@ void BQ76952::writeIntToMemory(unsigned int addr, unsigned int data) {
 	writeDataMemory(addr, reinterpret_cast<byte*>(&data), 2);
 }
 
+void BQ76952::writeFloatToMemory(unsigned int addr, float data)	{
+	writeDataMemory(addr, reinterpret_cast<byte*>(&data), 4);	
+}
+
+
 // Compute checksome = ~(sum of all bytes)
 byte BQ76952::computeChecksum(byte oldChecksum, byte data) {
   if(!oldChecksum)
@@ -324,24 +329,101 @@ int BQ76952::getCurrent(void) {
   return (int16_t)directCommandRead(DIR_CMD_CC2_CUR);
 }
 
+// Returns the accumulated charge and updates the time since this was reset
+float BQ76952::getAccumulatedCharge(void)	{
+  byte* buffer = subCommandwithdata(DASTATUS_6, 12);
+  
+  // Extract the integer portion (I4 - 32-bit signed integer)
+  int32_t accumChargeInteger = 
+      ((int32_t)buffer[3] << 24) |
+      ((int32_t)buffer[2] << 16) |
+      ((int32_t)buffer[1] << 8) |
+      buffer[0];
+
+  // Extract the fractional portion (U4 - 32-bit unsigned integer)
+  uint32_t accumChargeFraction = 
+      ((uint32_t)buffer[7] << 24) |
+      ((uint32_t)buffer[6] << 16) |
+      ((uint32_t)buffer[5] << 8) |
+      buffer[4];
+
+  // Extract the integer time in Seconds
+  this->AccumulatedChargeTime = 
+      ((uint32_t)buffer[11] << 24) |
+      ((uint32_t)buffer[10] << 16) |
+      ((uint32_t)buffer[9] << 8) |
+      buffer[8];
+	  
+  // Convert the fractional portion to userAh by dividing by 2^32
+  float fractionalCharge = (float)accumChargeFraction / (float)(1ULL << 32);
+
+  // Combine the integer and fractional portions
+  float totalAccumulatedCharge = accumChargeInteger + fractionalCharge;
+
+  return totalAccumulatedCharge;  
+}
+
+// Return the time in seconds since the accumulated charge was reset
+uint32_t BQ76952::getAccumulatedChargeTime(void)	{
+  getAccumulatedCharge();
+  return this->AccumulatedChargeTime;
+}
+
+// Resets accumulated charge and timer
+void BQ76952::ResetAccumulatedCharge(void)	{
+  CommandOnlysubCommand(COSCMD_RESET_PASSQ);
+}
+
+// Returns a bit mask of cells being balanced
+uint16_t BQ76952::GetCellBalancingBitmask(void) {
+    byte* buffer = subCommandwithdata(CB_ACTIVE_CELLS, 2);
+    return ((uint16_t)buffer[0]) | ((uint16_t)buffer[1] << 8);
+}
+
+// Read cumulative time spent balancing for each cell into a passed buffer
+void BQ76952::GetCellBalancingTimes(uint32_t* Cell_Balance_Times)	{
+  byte* buffer = subCommandwithdata(CBSTATUS2, 32);
+  
+  for(byte i = 1;i < 9;i++)  {
+    uint8_t offset = 4 * (i - 1);
+
+    Cell_Balance_Times[i] =
+      ((uint32_t)buffer[3 + offset] << 24) |
+      ((uint32_t)buffer[2 + offset] << 16) |
+      ((uint32_t)buffer[1 + offset] << 8) |
+      buffer[0 + offset];
+  }
+
+  buffer = subCommandwithdata(CBSTATUS3, 32);
+  for(byte i = 1;i < 9;i++)  {
+    uint8_t offset = 4 * (i - 1);
+
+    Cell_Balance_Times[i+8] =
+      ((uint32_t)buffer[3 + offset] << 24) |
+      ((uint32_t)buffer[2 + offset] << 16) |
+      ((uint32_t)buffer[1 + offset] << 8) |
+      buffer[0 + offset];
+  }	
+}
+
 void BQ76952::setFET(bq76952_fet fet, bq76952_fet_state state) {
   unsigned int subcmd;
   switch(state) {
     case OFF:
       switch(fet) {
         case DCHG:
-          subcmd = 0x0093;
+          subcmd = COSCMD_DSG_PDSG_OFF;
           break;
         case CHG:
-          subcmd = 0x0094;
+          subcmd = COSCMD_CHG_PCHG_OFF;
           break;
         default:
-          subcmd = 0x0095;
+          subcmd = COSCMD_ALL_FETS_OFF;
           break;
       }
       break;
     case ON:
-      subcmd = 0x0096;
+      subcmd = COSCMD_ALL_FETS_ON;
       break;
   }
   CommandOnlysubCommand(subcmd);
@@ -367,6 +449,11 @@ bool BQ76952::isDischarging(void) {
   }
   debugPrintln(F("[+] Discharging FET -> OFF"));
   return false;
+}
+
+// are cells being balanced?
+uint16_t BQ76952::isBalancing(void)	{
+	
 }
 
 // Measure chip temperature in °C

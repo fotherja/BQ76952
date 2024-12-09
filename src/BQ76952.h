@@ -42,13 +42,31 @@
 #define COSCMD_EXIT_CFGUPDATE       	0x0092	// Exits config mode
 #define COSCMD_ALL_FETS_ON       		0x0096	// Enables all FETS
 #define COSCMD_MANUFAC_TOGGLE_FE   		0x0022	// Toggles FET manufacture mode
+#define COSCMD_RESET_PASSQ				0x0082  // Resets integrated charge and timer
+#define	COSCMD_DSG_PDSG_OFF				0x0093	// Disables DSG and PDSG FET drivers
+#define COSCMD_CHG_PCHG_OFF				0x0094	// Disables CHG and PCHG FET drivers
+#define COSCMD_ALL_FETS_OFF				0x0095	// Disables CHG, DSG, PCHG, and PDSG FET drivers
+#define COSCMD_ALL_FETS_ON				0x0096	// Allows all four FETs to be on if other safety conditions are met
 
 // Subcommands with data
+#define DASTATUS_1						0x0071	// simultaneous cell voltage and current ADC counts
+#define DASTATUS_2						0x0072
+#define DASTATUS_3						0x0073
+#define DASTATUS_4						0x0074
 #define DASTATUS_5						0x0075	// 32 bytes (min/max cell voltages, CC1, CC3
 #define DASTATUS_6						0x0076  // Accumulated charge and timer
+#define DASTATUS_7						0x0077
+
+#define CB_ACTIVE_CELLS					0x0083	// returns bitmask of cells being balanced
+#define CB_SET_LVL						0x0084  // Balance cells above this threshold (mV)
+#define CBSTATUS1						0x0085  // seconds that balancing has been continuously active.
+#define CBSTATUS2						0x0086  // cumulative number of seconds of balancing for each cell
+#define CBSTATUS3						0x0087
 
 // Data memory locations:
 #define Enabled_Protections_A			0x9261
+#define Enabled_Protections_B			0x9262
+#define Enabled_Protections_C			0x9263
 #define CUV_Threshold					0x9275
 #define	COV_Threshold					0x9278
 #define	OCC_Threshold					0x9280
@@ -66,6 +84,25 @@
 #define FET_Options						0x9308	// [0x0D]
 #define Mfg_Status_Init					0x9343	// [0x0040]
 #define DA_Configuration				0x9303	// [0x05]
+
+#define CC_Gain							0x91A8	// Defaults assume a 1mR shunt
+#define	Capacity_Gain					0x91AC
+
+#define Cell_Balance_Min_Cell_V_Relaxed 0x933F	// [3900]
+#define Balancing_Configuration			0x9335
+#define Cell_Balance_Max_Cells			0x933A
+
+#define Min_Cell_Temp					0x9336
+#define Max_Cell_Temp					0x9337
+
+#define DFETOFF_Pin_Config				0x92FB
+#define TS1_Config						0x92FD
+#define TS2_Config						0x92FE
+#define TS3_Config						0x92FF
+#define DCHG_Pin_Config					0x9301
+
+#define Power_Config					0x9234
+
 
 // Fault Bits in BQ76952 registers
 #define BIT_SA_SC_DCHG            7
@@ -162,14 +199,22 @@ class BQ76952
 		void			writeDataMemory(unsigned int addr, byte* data_buffer, byte noOfBytes);
 		void			writeByteToMemory(unsigned int addr, byte data);
 		void			writeIntToMemory(unsigned int addr, unsigned int data);
+		void			writeFloatToMemory(unsigned int addr, float data);
 		
 		// API functions:
 		unsigned int 	getCellVoltage(byte cellNumber);
 		int 			getCurrent(void);
+		float			getAccumulatedCharge(void);
+		uint32_t		getAccumulatedChargeTime(void);
+		void			ResetAccumulatedCharge(void);
+		uint16_t		GetCellBalancingBitmask(void);
+		void			GetCellBalancingTimes(uint32_t* Cell_Balance_Times);
+		
 		void			setConnectedCells(unsigned int Cells);
 		void 			setFET(bq76952_fet fet, bq76952_fet_state state);
 		bool 			isCharging(void);
 		bool 			isDischarging(void);
+		uint16_t		isBalancing(void);
 
 		float 			getInternalTemp(void);
 		float 			getThermistorTemp(bq76952_thermistor thermistor);
@@ -184,6 +229,7 @@ class BQ76952
 		void 			debugPrintlnCmd(unsigned int cmd);	
 
 		byte			_DataBuffer[36];
+		uint32_t		AccumulatedChargeTime = 0;
 	private:
 		void 			enterConfigUpdate(void);
 		void 			exitConfigUpdate(void);
