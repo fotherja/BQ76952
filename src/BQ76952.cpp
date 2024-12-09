@@ -453,7 +453,7 @@ bool BQ76952::isDischarging(void) {
 
 // are cells being balanced?
 uint16_t BQ76952::isBalancing(void)	{
-	
+	return GetCellBalancingBitmask();
 }
 
 // Measure chip temperature in °C
