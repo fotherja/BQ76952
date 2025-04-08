@@ -82,6 +82,7 @@
 #define FET_Predischarge_Stop_Delta		0x930F	// [500 mV]
 
 #define FET_Options						0x9308	// [0x0D]
+#define Chg_Pump_Control				0x9309	// [0x01]
 #define Mfg_Status_Init					0x9343	// [0x0040]
 #define DA_Configuration				0x9303	// [0x05]
 
