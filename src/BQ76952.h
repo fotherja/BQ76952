@@ -70,6 +70,8 @@
 #define CUV_Threshold					0x9275
 #define	COV_Threshold					0x9278
 #define	OCC_Threshold					0x9280
+#define CUV_Delay				    0x9276   // [Default: 74 * 3.3 ms = 250 ms]
+#define COV_Delay				    0x9279   // [Default: 74 * 3.3 ms = 250 ms]
 
 #define OCD1_Threshold					0x9282	// [8 mV]
 #define OCD1_Delay						0x9283	// [13.3 us]
