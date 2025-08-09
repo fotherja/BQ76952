@@ -384,8 +384,8 @@ uint16_t BQ76952::GetCellBalancingBitmask(void) {
 void BQ76952::GetCellBalancingTimes(uint32_t* Cell_Balance_Times)	{
   byte* buffer = subCommandwithdata(CBSTATUS2, 32);
   
-  for(byte i = 1;i < 9;i++)  {
-    uint8_t offset = 4 * (i - 1);
+  for(byte i = 0;i < 8;i++)  {
+    uint8_t offset = 4 * i;
 
     Cell_Balance_Times[i] =
       ((uint32_t)buffer[3 + offset] << 24) |
@@ -395,8 +395,8 @@ void BQ76952::GetCellBalancingTimes(uint32_t* Cell_Balance_Times)	{
   }
 
   buffer = subCommandwithdata(CBSTATUS3, 32);
-  for(byte i = 1;i < 9;i++)  {
-    uint8_t offset = 4 * (i - 1);
+  for(byte i = 0;i < 8;i++)  {
+    uint8_t offset = 4 * i;
 
     Cell_Balance_Times[i+8] =
       ((uint32_t)buffer[3 + offset] << 24) |
@@ -549,6 +549,7 @@ void BQ76952::debugPrintlnCmd(unsigned int cmd) {
     Serial.println(cmd, HEX);
   }
 }
+
 
 
 
