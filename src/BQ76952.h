@@ -197,6 +197,7 @@ class BQ76952
 		unsigned int 	directCommandRead(byte command);
 		void 			CommandOnlysubCommand(unsigned int command);
 		byte* 			subCommandwithdata(unsigned int command, int bytes_to_read);
+		bool 			subCommandWriteData(uint16_t subcmd, byte* data, byte len);
 		
 		byte*			readDataMemory(unsigned int addr);
 		void			writeDataMemory(unsigned int addr, byte* data_buffer, byte noOfBytes);
@@ -240,3 +241,4 @@ class BQ76952
 };
 
 #endif
+
