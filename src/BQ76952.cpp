@@ -161,7 +161,7 @@ byte* BQ76952::subCommandwithdata(unsigned int command, int bytes_to_read) {
 // subcmd: 16-bit subcommand code
 // data: pointer to payload (may be nullptr if len==0)
 // len:  number of payload bytes (0..32 typically)
-bool BQ76952::subCommandWriteData(uint16_t subcmd, byte* data, byte len) {
+bool BQ76952::subCommandWriteData(uint16_t subcmd, const uint8_t* data, uint8_t len) {
   // Build [LSB, MSB, payload...]
   const uint8_t maxBlock = sizeof(_DataBuffer);            
   if ((uint16_t)len + 2 > maxBlock) {
@@ -617,6 +617,7 @@ void BQ76952::debugPrintlnCmd(unsigned int cmd) {
     Serial.println(cmd, HEX);
   }
 }
+
 
 
 
