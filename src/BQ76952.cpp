@@ -188,7 +188,7 @@ bool BQ76952::subCommandWriteData(uint16_t subcmd, const uint8_t* data, uint8_t 
     return false;
   }
 
-  delayMicroseconds(500); // brief settle; most cmds ~0.5–0.6 ms
+  delayMicroseconds(1000); // brief settle; most cmds ~0.5–0.6 ms
 
   // Write checksum & length to 0x60
   Wire.beginTransmission(BQ_I2C_ADDR);
@@ -617,6 +617,7 @@ void BQ76952::debugPrintlnCmd(unsigned int cmd) {
     Serial.println(cmd, HEX);
   }
 }
+
 
 
 
