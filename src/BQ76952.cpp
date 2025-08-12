@@ -156,6 +156,72 @@ byte* BQ76952::subCommandwithdata(unsigned int command, int bytes_to_read) {
     return _DataBuffer;  // Return pointer to buffer
 }
 
+// Write a subcommand with payload (no response data).
+// Returns true on success.
+// subcmd: 16-bit subcommand code
+// data: pointer to payload (may be nullptr if len==0)
+// len:  number of payload bytes (0..32 typically)
+bool BQ76952::subCommandWriteData(uint16_t subcmd, const uint8_t* data, uint8_t len) {
+  // Build [LSB, MSB, payload...]
+  const uint8_t maxBlock = sizeof(_DataBuffer);            
+  if ((uint16_t)len + 2 > maxBlock) {
+    debugPrintln(F("[!] subCommandWriteData: payload too large"));
+    return false;
+  }
+
+  _DataBuffer[0] = (uint8_t)(subcmd & 0xFF);
+  _DataBuffer[1] = (uint8_t)((subcmd >> 8) & 0xFF);
+  for (uint8_t i = 0; i < len; i++) _DataBuffer[2 + i] = data ? data[i] : 0;
+
+  // Compute checksum = ~sum(block) & 0xFF ; length = blockLen + 2
+  uint16_t sum = 0;
+  for (uint8_t i = 0; i < (uint8_t)(len + 2); i++) sum += _DataBuffer[i];
+  uint8_t checksum = (uint8_t)(~sum);                // same as (0xFF - (sum & 0xFF))
+  uint8_t writelen = (uint8_t)(len + 2 + 2);         // "+2" per TI (include subcmd bytes)
+
+  // Write block to 0x3E
+  Wire.beginTransmission(BQ_I2C_ADDR);
+  Wire.write(CMD_DIR_SUBCMD_LOW);                    // 0x3E
+  for (uint8_t i = 0; i < (uint8_t)(len + 2); i++) Wire.write(_DataBuffer[i]);
+  if (Wire.endTransmission() != 0) {
+    debugPrintln(F("[!] I2C error writing subcmd block"));
+    return false;
+  }
+
+  delayMicroseconds(1000); // brief settle; most cmds ~0.5–0.6 ms
+
+  // Write checksum & length to 0x60
+  Wire.beginTransmission(BQ_I2C_ADDR);
+  Wire.write(0x60);
+  Wire.write(checksum);
+  Wire.write(writelen);
+  if (Wire.endTransmission() != 0) {
+    debugPrintln(F("[!] I2C error writing checksum/length"));
+    return false;
+  }
+
+  // Optional: poll 0x3E/0x3F until device echoes the subcommand (completion)
+  unsigned long t0 = millis();
+  for (;;) {
+    Wire.beginTransmission(BQ_I2C_ADDR);
+    Wire.write(CMD_DIR_SUBCMD_LOW);                  // 0x3E
+    if (Wire.endTransmission(false) != 0) break;     // repeated start
+    if (Wire.requestFrom(BQ_I2C_ADDR, 2) == 2) {
+      uint8_t lo = Wire.read();
+      uint8_t hi = Wire.read();
+      if (lo == (uint8_t)(subcmd & 0xFF) && hi == (uint8_t)(subcmd >> 8)) break;
+    }
+    if (millis() - t0 > 10) {                        // ~10 ms guard
+      debugPrintln(F("[!] subcmd completion timeout"));
+      return false;
+    }
+  }
+
+  debugPrint(F("[+] Sub Cmd WRITE 0x"));
+  debugPrintlnCmd(subcmd);
+  return true;
+}
+
 // Read Bytes from Data memory of BQ76952
 // Provide an address. 32
 byte* BQ76952::readDataMemory(unsigned int addr) {
@@ -549,6 +615,12 @@ void BQ76952::debugPrintlnCmd(unsigned int cmd) {
     Serial.println(cmd, HEX);
   }
 }
+
+
+
+
+
+
 
 
 
