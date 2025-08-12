@@ -219,8 +219,6 @@ bool BQ76952::subCommandWriteData(uint16_t subcmd, const uint8_t* data, uint8_t 
 
   debugPrint(F("[+] Sub Cmd WRITE 0x"));
   debugPrintlnCmd(subcmd);
-  debugPrint(F(" len="));
-  debugPrintln(len);
   return true;
 }
 
@@ -617,6 +615,7 @@ void BQ76952::debugPrintlnCmd(unsigned int cmd) {
     Serial.println(cmd, HEX);
   }
 }
+
 
 
 
