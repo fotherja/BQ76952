@@ -88,6 +88,8 @@
 #define Mfg_Status_Init					0x9343	// [0x0040]
 #define DA_Configuration				0x9303	// [0x05]
 
+#define Cell_Open_Wire_Check_Time     	0x9314
+
 #define CC_Gain							0x91A8	// Defaults assume a 1mR shunt
 #define	Capacity_Gain					0x91AC
 
@@ -241,5 +243,6 @@ class BQ76952
 };
 
 #endif
+
 
 
